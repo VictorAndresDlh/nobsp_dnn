@@ -199,9 +199,11 @@ def NObSP_NN_single(X, y_est, model):
     for i in range(d):
         # Defining the input matrix that will be used to find the subspace of the nonlinear transformation of
         # the input variables x_i, onto which the output will be projected
-        
-        X_target = np.zeros((N, d)) #modificar para que arme una matriz de 1's y multiplique por epsilon y parametro definido
-        
+
+        X_target = np.zeros(
+            (N, d)
+        )  # modificar para que arme una matriz de 1's y multiplique por epsilon y parametro definido
+
         X_target[:, i] = X[:, i]
 
         # Defining the input matrix that will be used to find the reference subspace, along which the data
@@ -241,7 +243,8 @@ def NObSP_NN_single(X, y_est, model):
 
     return P_xy, y_e, Alpha
 
-def NObSP_NN_single_eps(X, y_est, model, eps = 0):
+
+def NObSP_NN_single_eps(X, y_est, model, eps=0.0):
     # Function to decompose the output of a NN regression model using oblique subspace projections. The function computes
     # appropriate evalautions of the netwrok that define the subspace of the nonlinear transformation of the input variables.
     # These subspaces lie in the same space where the output data is located. This function uses as input the following variables:
@@ -253,6 +256,7 @@ def NObSP_NN_single_eps(X, y_est, model, eps = 0):
     # The function returns d oblique projection matrices of size NxN, the estimated contribution of each input variable on the output,
     # and the alpha coefificents for the out-of-sample extension
 
+    #eps = 0.0
     model.eval()  # Setting the model in evaluation mode
     N = np.size(X, 0)  # computing the size of X along dimension 0
     d = np.size(X, 1)  # computing the size of X along dimension 1
@@ -261,16 +265,14 @@ def NObSP_NN_single_eps(X, y_est, model, eps = 0):
     y_e = torch.from_numpy(np.zeros((N, d))).type(
         torch.float
     )  # Initializing Matriz where the estimated nonlinear contributions will be stored, converting to a tensor object
-    
+
     P_xy_eps = np.zeros((N, N, d))  # Initializing proyection matrices
     y_e_eps = torch.from_numpy(np.zeros((N, d))).type(
         torch.float
     )  # Initializing Matriz where the estimated nonlinear contributions will be stored, converting to a tensor object
-    
-    y_final = torch.from_numpy(np.zeros((N, d))).type(
-        torch.float
-    )
-    
+
+    y_final = torch.from_numpy(np.zeros((N, d))).type(torch.float)
+
     neurons_last = list(model.children())[
         -1
     ].in_features  # Obtaining the dimension of the subspace where the data lies (number of neurons in the last layer)
@@ -290,10 +292,10 @@ def NObSP_NN_single_eps(X, y_est, model, eps = 0):
     for i in range(d):
         # Defining the input matrix that will be used to find the subspace of the nonlinear transformation of
         # the input variables x_i, onto which the output will be projected
-        
+
         X_target = np.zeros((N, d))
-        X_target_eps = np.ones((N, d))*eps
-        
+        X_target_eps = np.ones((N, d)) * eps
+
         X_target[:, i] = X[:, i]
         X_target_eps[:, i] = X[:, i]
 
@@ -301,14 +303,14 @@ def NObSP_NN_single_eps(X, y_est, model, eps = 0):
         # will be projected.
         X_reference = np.copy(X)
         X_reference[:, i] = 0
-        
+
         X_reference_eps = np.copy(X)
         X_reference_eps[:, i] = eps
 
         # transforming the matrices to tensor objects to be used in pytorch
         X_target = torch.from_numpy(X_target).type(torch.float)
         X_reference = torch.from_numpy(X_reference).type(torch.float)
-        
+
         X_target_eps = torch.from_numpy(X_target_eps).type(torch.float)
         X_reference_eps = torch.from_numpy(X_reference_eps).type(torch.float)
 
@@ -320,7 +322,7 @@ def NObSP_NN_single_eps(X, y_est, model, eps = 0):
             y_reference, X_reference_sub = model(
                 X_reference
             )  # X_reference_sub is a basis for the nonlienar transformation of the data in X_reference
-            
+
             y_target_eps, X_target_sub_eps = model(
                 X_target_eps
             )  # X_target_sub is a basis for the nonlienar transformation of the data in X_target
@@ -329,11 +331,13 @@ def NObSP_NN_single_eps(X, y_est, model, eps = 0):
             )  # X_reference_sub is a basis for the nonlienar transformation of the data in X_reference
 
         # Centering the bassis of the target and reference subspaces
-        X_target_sub = X_target_sub - torch.mean(X_target_sub, dim=0)
-        X_reference_sub = X_reference_sub - torch.mean(X_reference_sub, dim=0)
-        
-        X_target_sub_eps = X_target_sub_eps - torch.mean(X_target_sub_eps, dim=0)
-        X_reference_sub_eps = X_reference_sub_eps - torch.mean(X_reference_sub_eps, dim=0)
+        #X_target_sub = X_target_sub - torch.mean(X_target_sub, dim=0)
+        #X_reference_sub = X_reference_sub - torch.mean(X_reference_sub, dim=0)
+
+        #X_target_sub_eps = X_target_sub_eps - torch.mean(X_target_sub_eps, dim=0)
+        #X_reference_sub_eps = X_reference_sub_eps - torch.mean(
+        #    X_reference_sub_eps, dim=0
+        #)
 
         # Computing the oblique projection onto the susbspace defined by the nonlienar transformation of x_i along
         # the reference subspace, which contains the nonlinear transofrmation of all variables except x_i
@@ -346,15 +350,13 @@ def NObSP_NN_single_eps(X, y_est, model, eps = 0):
         y_e[:, [i]] = P @ (
             y_est - y_est.mean()
         )  # Using the projection matrices to ptoject the output vector and find the nonlinear contribution of each variable.
-        
+
         P_eps = torch.from_numpy(P_xy_eps[:, :, i]).type(
             torch.float
         )  # Converting form pytorch to numpy
-        y_e_eps[:, [i]] = P_eps @ (
-            y_est - y_est.mean()
-        )
-        
-        y_final[:, [i]] = (y_e_eps[:, [i]] - eps*y_e[:, [i]])/(1-eps)
+        y_e_eps[:, [i]] = P_eps @ (y_est - y_est.mean())
+
+        y_final[:, [i]] = (y_e_eps[:, [i]] - eps * y_e[:, [i]]) / (1 - eps)
 
     Alpha = torch.linalg.lstsq(X_target_tot, y_e, rcond=None, driver="gelsd")[0]
 
