@@ -256,7 +256,7 @@ def NObSP_NN_single_eps(X, y_est, model, eps=0.0):
     # The function returns d oblique projection matrices of size NxN, the estimated contribution of each input variable on the output,
     # and the alpha coefificents for the out-of-sample extension
 
-    #eps = 0.0
+    # eps = 0.0
     model.eval()  # Setting the model in evaluation mode
     N = np.size(X, 0)  # computing the size of X along dimension 0
     d = np.size(X, 1)  # computing the size of X along dimension 1
@@ -307,6 +307,9 @@ def NObSP_NN_single_eps(X, y_est, model, eps=0.0):
         X_reference_eps = np.copy(X)
         X_reference_eps[:, i] = eps
 
+        X_target_all = torch.from_numpy(X_target).type(torch.float)
+        X_reference_all = torch.from_numpy(X_reference).type(torch.float)
+
         # transforming the matrices to tensor objects to be used in pytorch
         X_target = torch.from_numpy(X_target).type(torch.float)
         X_reference = torch.from_numpy(X_reference).type(torch.float)
@@ -331,13 +334,13 @@ def NObSP_NN_single_eps(X, y_est, model, eps=0.0):
             )  # X_reference_sub is a basis for the nonlienar transformation of the data in X_reference
 
         # Centering the bassis of the target and reference subspaces
-        #X_target_sub = X_target_sub - torch.mean(X_target_sub, dim=0)
-        #X_reference_sub = X_reference_sub - torch.mean(X_reference_sub, dim=0)
+        X_target_sub = X_target_sub - torch.mean(X_target_sub, dim=0)
+        X_reference_sub = X_reference_sub - torch.mean(X_reference_sub, dim=0)
 
-        #X_target_sub_eps = X_target_sub_eps - torch.mean(X_target_sub_eps, dim=0)
-        #X_reference_sub_eps = X_reference_sub_eps - torch.mean(
-        #    X_reference_sub_eps, dim=0
-        #)
+        X_target_sub_eps = X_target_sub_eps - torch.mean(X_target_sub, dim=0)
+        X_reference_sub_eps = X_reference_sub_eps - torch.mean(
+            X_reference_sub, dim=0
+        )
 
         # Computing the oblique projection onto the susbspace defined by the nonlienar transformation of x_i along
         # the reference subspace, which contains the nonlinear transofrmation of all variables except x_i
