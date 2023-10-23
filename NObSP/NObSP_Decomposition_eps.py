@@ -333,7 +333,8 @@ def NObSP_NN_single_eps(X, y_est, model, eps=0.0):
                 X_reference_eps
             )  # X_reference_sub is a basis for the nonlienar transformation of the data in X_reference
 
-        # Centering the bassis of the target and reference subspaces
+        #-------------------------------------------------------------------------------------------
+        # Centering the bassis of the target and reference subspaces (tener cuidado con este centrado)
         X_target_sub = X_target_sub - torch.mean(X_target_sub, dim=0)
         X_reference_sub = X_reference_sub - torch.mean(X_reference_sub, dim=0)
 
