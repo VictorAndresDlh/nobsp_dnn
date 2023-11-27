@@ -19,3 +19,21 @@ class Classifier_NN(nn.Module):
         y_lin = self.Linear_3(x_t)
         x = F.softmax(y_lin,dim=1)
         return x, x_t, y_lin
+    
+class Classifier_CIFAR(nn.Module):
+    def __init__(self):
+        super(Classifier_CIFAR, self).__init__()
+        self.Linear_1 = nn.Linear(in_features = 84, out_features = 128)
+        self.Linear_2 = nn.Linear(in_features = 128, out_features = 256)
+        self.Linear_3 = nn.Linear(in_features = 256, out_features = 128)
+        self.Linear_4 = nn.Linear(in_features = 128, out_features = 64)
+        self.Linear_5 = nn.Linear(in_features = 64, out_features = 10)
+        
+    def forward(self,x):
+        x = F.relu(self.Linear_1(x))
+        x = F.relu(self.Linear_2(x))
+        x = F.relu(self.Linear_3(x))
+        x_t= F.relu(self.Linear_4(x)) # Computing the transformation done to the vector in the layer previous to the output
+        y_lin = self.Linear_5(x_t)
+        x = F.softmax(y_lin,dim=1)
+        return x, x_t, y_lin
