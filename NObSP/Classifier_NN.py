@@ -21,10 +21,10 @@ class Classifier_NN(nn.Module):
         return x, x_t, y_lin
     
 class Classifier_CIFAR(nn.Module):
-    def __init__(self):
+    def __init__(self, in_number):
         super(Classifier_CIFAR, self).__init__()
-        self.Linear_1 = nn.Linear(in_features = 84, out_features = 128)
-        self.Linear_2 = nn.Linear(in_features = 128, out_features = 256)
+        self.Linear_1 = nn.Linear(in_features = in_number, out_features = 512)
+        self.Linear_2 = nn.Linear(in_features = 512, out_features = 256)
         self.Linear_3 = nn.Linear(in_features = 256, out_features = 128)
         self.Linear_4 = nn.Linear(in_features = 128, out_features = 64)
         self.Linear_5 = nn.Linear(in_features = 64, out_features = 10)
